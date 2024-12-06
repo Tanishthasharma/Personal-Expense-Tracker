@@ -69,17 +69,20 @@ exports.addIncome = async (req, res) => {
     if (!title || !category || !description || !date) {
         return res.status(400).json({ message: 'All fields are required!' });
     }
-    if (typeof amount !== 'number' || amount <= 0) {
-        return res.status(400).json({ message: 'Amount must be a positive number' });
-    }
-
-    const income = new Income({
-        title,
-        amount,
-        category,
-        description,
-        date
-    });
+    
+      // Convert amount to a number and check validation
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+          return res.status(400).json({ message: 'Amount must be a positive number' });
+      }
+  
+      const income = new Income({
+          title,
+          amount: numericAmount, // Use the numeric amount here
+          category,
+          description,
+          date
+      });
 
     try {
         await income.save();

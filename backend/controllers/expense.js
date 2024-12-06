@@ -1,19 +1,77 @@
 
+// const Expense = require('../models/ExpenseModel');
+// exports.addExpense = async (req, res) => {
+//     console.log(req.body); // Log request body to debug
+//     const { title, amount, category, description, date } = req.body;
+
+//     if (!title || !category || !description || !date) {
+//         return res.status(400).json({ message: 'All fields are required!' });
+//     }
+//     if (typeof amount !== 'number' || amount <= 0) {
+//         return res.status(400).json({ message: 'Amount must be a positive number' });
+//     }
+
+//     const expense = new Expense({
+//         title,
+//         amount,
+//         category,
+//         description,
+//         date
+//     });
+
+//     try {
+//         await expense.save();
+//         res.status(200).json({ message: 'Expense Added' });
+//     } catch (error) {
+//         console.error('Error adding expense:', error);
+//         res.status(500).json({ message: 'Internal Server Error' });
+//     }
+//     //console.log(income);
+// };
+
+// exports.getExpenses = async(req,res) =>{
+//   try {
+//      const expenses = await Expense.find().sort({createdAt : -1});
+//      res.status(200).json(expenses);
+//   } catch (error) {
+//     res.status(500).json({message: 'Server Error'})
+//   }
+// }
+
+// exports.deleteExpenses = async(req,res) =>{
+//     const {id} = req.params;
+//     console.log(req.params);
+//     Expense.findByIdAndDelete(id)
+//     .then((expense) =>{
+//        res.status(200).json({message : 'Expense Deleted'})
+//     })
+//      .catch((err) =>{
+//        res.status(200).json({message: 'Server Error'})
+//      })
+//   }
+  
 const Expense = require('../models/ExpenseModel');
+
+// Add Expense
 exports.addExpense = async (req, res) => {
     console.log(req.body); // Log request body to debug
+
     const { title, amount, category, description, date } = req.body;
 
+    // Basic field validation
     if (!title || !category || !description || !date) {
         return res.status(400).json({ message: 'All fields are required!' });
     }
-    if (typeof amount !== 'number' || amount <= 0) {
+
+    // Validate amount as a positive number
+    const amountValue = Number(amount); // Ensure the amount is a number
+    if (isNaN(amountValue) || amountValue <= 0) {
         return res.status(400).json({ message: 'Amount must be a positive number' });
     }
 
     const expense = new Expense({
         title,
-        amount,
+        amount: amountValue,  // Ensure amount is stored as a number
         category,
         description,
         date
@@ -26,27 +84,31 @@ exports.addExpense = async (req, res) => {
         console.error('Error adding expense:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-    //console.log(income);
 };
 
-exports.getExpenses = async(req,res) =>{
-  try {
-     const expenses = await Expense.find().sort({createdAt : -1});
-     res.status(200).json(expenses);
-  } catch (error) {
-    res.status(500).json({message: 'Server Error'})
-  }
-}
+// Get Expenses
+exports.getExpenses = async (req, res) => {
+    try {
+        const expenses = await Expense.find().sort({ createdAt: -1 });
+        res.status(200).json(expenses);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
 
-exports.deleteExpenses = async(req,res) =>{
-    const {id} = req.params;
-    console.log(req.params);
-    Expense.findByIdAndDelete(id)
-    .then((expense) =>{
-       res.status(200).json({message : 'Expense Deleted'})
-    })
-     .catch((err) =>{
-       res.status(200).json({message: 'Server Error'})
-     })
-  }
-  
+// Delete Expense
+exports.deleteExpenses = async (req, res) => {
+    const { id } = req.params;
+    console.log(req.params); // Log the ID for debugging
+
+    try {
+        const expense = await Expense.findByIdAndDelete(id);
+        if (!expense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+        res.status(200).json({ message: 'Expense Deleted' });
+    } catch (err) {
+        console.error('Error deleting expense:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};

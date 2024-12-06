@@ -11,7 +11,7 @@ const PORT = process.env.PORT
 
 //middleware
 app.use(express.json());
-app.use(cors())
+app.use(cors());   //as frontend and backened are in different ports
 
 //To check ki API is working or not in postman
 // app.get('/' , (req,res) =>{
